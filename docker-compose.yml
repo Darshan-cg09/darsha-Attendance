@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres99
+    ports:
+      - "8101:5432"
+    environment:
+      POSTGRES_DB: attendance_system
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - attendance-net
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: backend-attendance
+    ports:
+      - "3085:3085"
+    environment:
+      PORT: 3085
+      DB_USER: postgres
+      DB_PASSWORD: admin123
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: attendance_system
+    depends_on:
+      - postgres
+    networks:
+      - attendance-net
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: frontend-attendance
+    ports:
+      - "7781:80"
+    networks:
+      - attendance-net
+
+  hr:
+    build:
+      context: ./HR
+      dockerfile: Dockerfile
+    container_name: hr-attendance
+    ports:
+      - "7782:80"
+    networks:
+      - attendance-net
+
+volumes:
+  pgdata:
+
+networks:
+  attendance-net:
+    driver: bridge
+
